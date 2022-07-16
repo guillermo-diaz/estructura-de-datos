@@ -185,9 +185,237 @@ public class GrafoEtiquetado {
         return flag;
     }
 
+    public boolean existeCamino(Object origen, Object destino){
+        boolean flag = false;
+
+        NodoVert aux, auxOrig, auxDest;
+        aux = this.inicio; 
+        auxOrig = null;
+        auxDest = null;
+
+        while (aux != null && (auxOrig == null || auxDest == null)){ //busco a los 2 nodos
+            if (aux.getElem().equals(origen)){
+                auxOrig = aux;
+            } 
+            if (aux.getElem().equals(destino)){
+                auxDest = aux;
+            }
+            aux = aux.getSigVertice();
+        }
+
+        if (auxOrig != null && auxDest != null){ //si ambos fueron encontrados, busco un camino
+            Lista visitados = new Lista();
+            flag = existeCaminoAux(auxOrig, destino, visitados);
+
+        }
+        return flag;
+    }
+
+    public boolean existeCaminoAux(NodoVert n, Object dest, Lista vis){
+        boolean flag = false;
+
+        if (n != null){
+            if (n.getElem().equals(dest)){ //camino encontrado
+                flag = true;
+            } else {
+                //si no es el camino, verifico si hay camino entre n y dest
+                vis.insertar(n.getElem(), vis.longitud()+1);
+                NodoAdy ady = n.getPrimerAdy();
+
+                while (!flag && ady != null){
+                    if (vis.localizar(ady.getVertice().getElem()) < 0){
+                        flag = existeCaminoAux(ady.getVertice(), dest, vis);
+                    }
+                    ady = ady.getSigAdyacente();
+                }
+            }
+        }
+        return flag;
+    }
+
+    public Lista caminoMasCorto(Object origen, Object destino){
+        Lista camMin = new Lista();
+
+        NodoVert aux, auxOrig, auxDest;
+        aux = this.inicio; 
+        auxOrig = null;
+        auxDest = null;
+
+        while (aux != null && (auxOrig == null || auxDest == null)){ //busco a los 2 nodos
+            if (aux.getElem().equals(origen)){
+                auxOrig = aux;
+            } 
+            if (aux.getElem().equals(destino)){
+                auxDest = aux;
+            }
+            aux = aux.getSigVertice();
+        }
+
+        if (auxOrig != null && auxDest != null){ //si ambos fueron encontrados, busco un camino
+            Lista visitados = new Lista(), camActual = new Lista();
+            camMin = caminoCortoAux(auxOrig, destino, camMin, camActual, visitados);
+
+        }
+        return camMin;
+    }
+
+    private Lista caminoCortoAux(NodoVert n, Object destino, Lista camMin, Lista camActual, Lista visitados){
+
+        if (n != null){
+            Object elem = n.getElem();
+            System.out.println("ELEM: "+elem);
+            
+            visitados.insertar(elem, visitados.longitud()+1); //lo pongo en visitados
+            camActual.insertar(elem, camActual.longitud()+1);
+            System.out.println(camActual.toString());
+            System.out.println("visitados: "+visitados.toString());
+            System.out.println("----------------");
+
+            if (elem.equals(destino)){ //si llego al destino
+                if (camMin.esVacia() || (camMin.longitud() > camActual.longitud())){ //si encontró un camino menor, lo cambio
+                    camMin = camActual.clone(); //retorno un clon para no modificar la referencia
+                }
+                
+            } else {
+                NodoAdy ady = n.getPrimerAdy();
+
+                while (ady != null){ //paso recursivo con sus adyacentes 
+                    if (visitados.localizar(ady.getVertice().getElem()) < 0){
+                        camMin = caminoCortoAux(ady.getVertice(), destino, camMin, camActual, visitados); 
+                    }
+                    ady = ady.getSigAdyacente();
+                }
+            }
+            camActual.eliminar(camActual.longitud()); //ya lo visite, lo elimino del camino
+            visitados.eliminar(visitados.longitud()); //lo saco de visitados ya que puede haber mas caminos que visiten este nodo
+        }
+
+        return camMin;
+    }
+
+    public Lista caminoMasLargo(Object origen, Object destino){
+        Lista camMax = new Lista();
+
+        NodoVert aux, auxOrig, auxDest;
+        aux = this.inicio; 
+        auxOrig = null;
+        auxDest = null;
+
+        while (aux != null && (auxOrig == null || auxDest == null)){ //busco a los 2 nodos
+            if (aux.getElem().equals(origen)){
+                auxOrig = aux;
+            } 
+            if (aux.getElem().equals(destino)){
+                auxDest = aux;
+            }
+            aux = aux.getSigVertice();
+        }
+
+        if (auxOrig != null && auxDest != null){ //si ambos fueron encontrados, busco un camino
+            Lista visitados = new Lista(), camActual = new Lista();
+            camMax = caminoLargoAux(auxOrig, destino, camMax, camActual, visitados);
+
+        }
+        return camMax;
+    }
+
+    private Lista caminoLargoAux(NodoVert n, Object destino, Lista camMax, Lista camActual, Lista visitados){
+
+        if (n != null){
+            
+            Object elem = n.getElem();
+            System.out.println("ELEM: "+elem);
+            visitados.insertar(elem, visitados.longitud()+1); //lo pongo en visitados
+            camActual.insertar(elem, camActual.longitud()+1);
+
+            if (elem.equals(destino)){ //si llego al destino
+
+                if (camMax.longitud() < camActual.longitud()){ //si encontró un camino menor, lo cambio
+                    camMax = camActual.clone(); //retorno un clon para no modificar la referencia
+                }
+                
+            } else {
+                NodoAdy ady = n.getPrimerAdy();
+
+                while (ady != null){ //paso recursivo con sus adyacentes 
+                    if (visitados.localizar(ady.getVertice().getElem()) < 0){
+                        camMax = caminoLargoAux(ady.getVertice(), destino, camMax, camActual, visitados); 
+                    }
+                    ady = ady.getSigAdyacente();
+                }
+            }
+            camActual.eliminar(camActual.longitud()); //ya lo visite, lo elimino del camino
+            visitados.eliminar(visitados.longitud()); //lo saco de visitados ya que puede haber mas caminos que visiten este nodo
+        }
+
+        return camMax;
+    }
+
+    
+
     public Lista listarEnProfundidad(){
-        Lista ls = new Lista();
-        return ls;
+        Lista visitados = new Lista();
+        NodoVert aux = this.inicio;
+        
+        while (aux != null){ 
+            if (visitados.localizar(aux.getElem()) < 0){ //si el vertice no fue visitado
+                listarEnProfundidadAux(aux, visitados);
+            }
+            aux = aux.getSigVertice();
+        }
+        
+        return visitados;
+    }
+
+    private void listarEnProfundidadAux(NodoVert n, Lista visitados){
+        if (n != null){
+            visitados.insertar(n.getElem(), visitados.longitud()+1); //lo visita
+            NodoAdy ady = n.getPrimerAdy(); 
+
+            while (ady != null){ //visita a los adyacentes que no fueron visitados
+                if (visitados.localizar(ady.getVertice().getElem()) < 0){
+                    listarEnProfundidadAux(ady.getVertice(), visitados);
+                }
+                ady = ady.getSigAdyacente();
+            }
+        }
+    }
+
+    public Lista listarEnAnchura(){
+        Lista visitados = new Lista();
+        NodoVert aux = this.inicio;
+        
+        while (aux != null){ 
+            if (visitados.localizar(aux.getElem()) < 0){ //si el vertice no fue visitado
+                anchuraDesde(aux, visitados);
+            }
+            aux = aux.getSigVertice();
+        }
+        
+        return visitados;
+    }
+
+    private void anchuraDesde(NodoVert vertInicio, Lista vis){
+        NodoVert aux;
+        NodoAdy ady;
+        Cola q = new Cola();
+        vis.insertar(vertInicio.getElem(), vis.longitud()+1);
+        q.poner(vertInicio);
+
+        while (!q.esVacia()){
+            aux = (NodoVert) q.obtenerFrente();
+            q.sacar();
+            ady = aux.getPrimerAdy();
+            
+            while (ady != null){
+                Object elem = ady.getVertice().getElem();
+                if (vis.localizar(elem) < 0){ //si no esta en visitados
+                    vis.insertar(elem, vis.longitud()+1); //lo visito y luego lo recorro por anchura
+                    q.poner(ady.getVertice());
+                }
+                ady = ady.getSigAdyacente();
+            }
+        }
     }
 
     public boolean esVacio(){
