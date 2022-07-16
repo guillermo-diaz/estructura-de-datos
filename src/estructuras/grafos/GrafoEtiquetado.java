@@ -263,13 +263,9 @@ public class GrafoEtiquetado {
 
         if (n != null){
             Object elem = n.getElem();
-            System.out.println("ELEM: "+elem);
-            
+
             visitados.insertar(elem, visitados.longitud()+1); //lo pongo en visitados
             camActual.insertar(elem, camActual.longitud()+1);
-            System.out.println(camActual.toString());
-            System.out.println("visitados: "+visitados.toString());
-            System.out.println("----------------");
 
             if (elem.equals(destino)){ //si llego al destino
                 if (camMin.esVacia() || (camMin.longitud() > camActual.longitud())){ //si encontró un camino menor, lo cambio
